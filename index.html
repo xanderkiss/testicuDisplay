@@ -57,13 +57,13 @@
         .refresh-button:hover {
             background-color: #45a049;
         }
-        td div {
-            margin: 2px 0;
+        .new-data {
+            background-color: #e8f5e9; /* สีพื้นหลังสำหรับข้อมูลใหม่ */
+            animation: highlight 2s ease-out;
         }
-        /* เพิ่มสไตล์สำหรับ BedNumber และ Score */
-        td.bed-number, td.score {
-            font-weight: bold;
-            font-size: 18px; /* ปรับขนาดตัวเลขให้ใหญ่ขึ้น */
+        @keyframes highlight {
+            from { background-color: #e8f5e9; }
+            to { background-color: #fff; }
         }
     </style>
 </head>
@@ -87,45 +87,40 @@
         const spreadsheetId = '1KM5sc0d0uTWtx5uUom3Ud30wKa0C_KzAJabgTio1OqQ';
         const range = 'ICU-1!A2:C'; // เปลี่ยนเป็นช่วงข้อมูลที่คุณต้องการดึง
 
+        let lastData = [];
+
         function fetchSheetData() {
             fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}?key=${apiKey}`)
                 .then(response => response.json())
                 .then(data => {
                     const tbody = document.querySelector('#sheetData tbody');
-                    tbody.innerHTML = ''; // ล้างข้อมูลเดิม
+                    const newData = data.values;
 
-                    data.values.forEach(row => {
-                        const tr = document.createElement('tr');
-                        
-                        // แยกวันที่และเวลา
-                        const timestamp = row[0];
-                        const [date, time] = timestamp.split(', ');
-                        
-                        // สร้างเซลล์สำหรับวันที่และเวลา
-                        const tdTimestamp = document.createElement('td');
-                        tdTimestamp.innerHTML = `<div>${date}</div><div>${time}</div>`;
-                        tr.appendChild(tdTimestamp);
+                    // ตรวจสอบข้อมูลใหม่
+                    if (JSON.stringify(newData) !== JSON.stringify(lastData)) {
+                        tbody.innerHTML = ''; // ล้างข้อมูลเดิม
 
-                        // เพิ่มเซลล์สำหรับ BedNumber
-                        const tdBedNumber = document.createElement('td');
-                        tdBedNumber.textContent = row[1];
-                        tdBedNumber.classList.add('bed-number'); // เพิ่มคลาสสำหรับ BedNumber
-                        tr.appendChild(tdBedNumber);
+                        newData.forEach((row, index) => {
+                            const tr = document.createElement('tr');
+                            if (index >= lastData.length) {
+                                tr.classList.add('new-data'); // เพิ่มคลาสสำหรับข้อมูลใหม่
+                            }
+                            row.forEach(cell => {
+                                const td = document.createElement('td');
+                                td.textContent = cell;
+                                tr.appendChild(td);
+                            });
+                            tbody.appendChild(tr);
+                        });
 
-                        // เพิ่มเซลล์สำหรับ Score
-                        const tdScore = document.createElement('td');
-                        tdScore.textContent = row[2];
-                        tdScore.classList.add('score'); // เพิ่มคลาสสำหรับ Score
-                        tr.appendChild(tdScore);
-
-                        tbody.appendChild(tr);
-                    });
+                        lastData = newData; // อัพเดตข้อมูลล่าสุด
+                    }
                 })
                 .catch(error => console.error('Error fetching data:', error));
         }
 
         fetchSheetData(); // ดึงข้อมูลเมื่อโหลดหน้า
-        setInterval(fetchSheetData, 60000); // อัพเดตข้อมูลทุก 1 นาที
+        setInterval(fetchSheetData, 5000); // อัพเดตข้อมูลทุก 5 วินาที
     </script>
 </body>
 </html>
