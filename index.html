@@ -60,6 +60,11 @@
         td div {
             margin: 2px 0;
         }
+        /* เพิ่มสไตล์สำหรับ BedNumber และ Score */
+        td.bed-number, td.score {
+            font-weight: bold;
+            font-size: 18px; /* ปรับขนาดตัวเลขให้ใหญ่ขึ้น */
+        }
     </style>
 </head>
 <body>
@@ -101,13 +106,16 @@
                         tdTimestamp.innerHTML = `<div>${date}</div><div>${time}</div>`;
                         tr.appendChild(tdTimestamp);
 
-                        // เพิ่มเซลล์สำหรับ BedNumber และ Score
+                        // เพิ่มเซลล์สำหรับ BedNumber
                         const tdBedNumber = document.createElement('td');
                         tdBedNumber.textContent = row[1];
+                        tdBedNumber.classList.add('bed-number'); // เพิ่มคลาสสำหรับ BedNumber
                         tr.appendChild(tdBedNumber);
 
+                        // เพิ่มเซลล์สำหรับ Score
                         const tdScore = document.createElement('td');
                         tdScore.textContent = row[2];
+                        tdScore.classList.add('score'); // เพิ่มคลาสสำหรับ Score
                         tr.appendChild(tdScore);
 
                         tbody.appendChild(tr);
